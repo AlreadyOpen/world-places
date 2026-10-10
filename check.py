@@ -6,14 +6,16 @@ import glob, json, py_compile, re, subprocess, sys
 import yaml
 
 for p in glob.glob('*.py'): py_compile.compile(p, doraise=True)
-src = json.load(open('sources.json')); card = open('hf/README.md', encoding='utf-8').read()
+src = json.load(open('sources.json'))
+cards = {c: open(c, encoding='utf-8').read() for c in ('hf/README.md', 'hf/README-nc.md')}   # open and nc datasets
+card = '\n'.join(cards.values())
 assert src, 'sources.json is empty'
 for s in src:
     missing = {'name', 'owner', 'url', 'licence'} - s.keys()
     assert not missing, f'{s.get("name")}: missing {missing}'
     assert s['url'].startswith('https://') and s['licence'].startswith('https://'), f'{s["name"]}: url and licence must be https links'
-    assert s['owner'] in card, f'hf/README.md does not credit {s["owner"]}'
-assert re.search(r'^license_link: https://', card, re.M), 'hf/README.md has no license_link'
+    assert s['owner'] in card, f'no dataset card credits {s["owner"]}'
+for c, t in cards.items(): assert re.search(r'^license_link: https://', t, re.M), f'{c} has no license_link'
 for w in glob.glob('.github/workflows/*.yml'):
     y = yaml.safe_load(open(w))                                        # YAML reads the key `on` as True
     assert isinstance(y, dict) and (y.get('on') or y.get(True)) and y.get('jobs'), f'{w}: no triggers or jobs (invalid workflow)'

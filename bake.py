@@ -298,8 +298,24 @@ def countries():
     return len(json.load(open(src))['features'])
 
 
+# Sources with no open licence (republished with credit, Helen 2026-10-10) go to a separate dataset, world-places-nc, and only
+# the separate world-views-nc site reads them; the open world-places and world-views use open-licence sources only.
+NC = {'guernsey', 'northern_cyprus', 'anguilla', 'montserrat', 'saint_helena', 'falklands', 'vatican', 'somaliland_manual'}
+NC_OUT = os.path.join(sources.OUT, 'nc')
+
+
+def write_index(out, ids, failed, extra=None):
+    files = sorted(f[:-5] for f in os.listdir(out) if f.endswith('.json') and f[:-5] in ids)
+    counts = {f: len(json.load(open(os.path.join(out, f + '.json')))['places']) for f in files}
+    idx = {'built': datetime.datetime.now().isoformat(timespec='seconds'), 'counts': {**counts, **(extra or {})},
+           'files': [f + '.json' for f in files], 'failed': [x for x in failed if x.split(':')[0] in ids or x.startswith('countries:') and extra]}
+    if extra:
+        idx['tiles'] = 'countries.pmtiles' if os.path.exists(os.path.join(out, 'countries.pmtiles')) else None
+    json.dump(idx, open(os.path.join(out, 'index.json'), 'w'), indent=1)
+
+
 def main(ids):
-    os.makedirs(sources.OUT, exist_ok=True)
+    os.makedirs(NC_OUT, exist_ok=True)
     failed = []
     for sid in ids:
         f, publisher, licence, url, *extra = SOURCES[sid]
@@ -307,19 +323,19 @@ def main(ids):
             places = f()
         except Exception as e:                                             # keep the last good file; the gate notices a gap
             failed.append(f'{sid}: {e}'); print(f'{sid}: FAILED {e}', file=sys.stderr); continue
+        out = NC_OUT if sid in NC else sources.OUT
         json.dump({'source': sid, 'publisher': publisher, 'url': url, 'licence': licence, **(extra[0] if extra else {}), 'places': places},
-                  open(os.path.join(sources.OUT, f'{sid}.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+                  open(os.path.join(out, f'{sid}.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
         print(sid, [(p['iso3'], p['population'], p['period']) for p in places])
-    files = sorted(f[:-5] for f in os.listdir(sources.OUT) if f.endswith('.json') and f[:-5] in SOURCES)
-    places = {f: len(json.load(open(os.path.join(sources.OUT, f + '.json')))['places']) for f in files}
+    for stale in [f for f in os.listdir(sources.OUT) if f[:-5] in NC]:      # an older bake wrote nc sources to the open folder
+        os.remove(os.path.join(sources.OUT, stale))
+    extra = {}
     try:
-        places['countries'] = countries()
+        extra['countries'] = countries()
     except Exception as e:
         failed.append(f'countries: {e}'); print(f'countries: FAILED {e}', file=sys.stderr)
-    idx = {'built': datetime.datetime.now().isoformat(timespec='seconds'), 'counts': places,
-           'files': [f + '.json' for f in files], 'failed': failed,
-           'tiles': 'countries.pmtiles' if os.path.exists(os.path.join(sources.OUT, 'countries.pmtiles')) else None}
-    json.dump(idx, open(os.path.join(sources.OUT, 'index.json'), 'w'), indent=1)
+    write_index(sources.OUT, set(SOURCES) - NC, failed, extra)
+    write_index(NC_OUT, NC, failed)
     if len([f for f in failed if not f.startswith('countries:')]) == len(ids):
         sys.exit('every source failed')
 

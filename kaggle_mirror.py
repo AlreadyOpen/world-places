@@ -12,7 +12,8 @@ Usage: python3 kaggle_mirror.py                                  (reads REPO, DA
 import json, os, re, subprocess, sys, tempfile
 
 def card_body():
-    t = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'hf', 'README.md'), encoding='utf-8').read()
+    import publish                                                         # the edition's own card (world-places: open or nc)
+    t = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), publish.CARD), encoding='utf-8').read()
     return re.sub(r'\A---\n.*?\n---\n', '', t, flags=re.S).strip()
 
 def mirror(slug, title, root, paths):
@@ -40,4 +41,4 @@ if __name__ == '__main__':
         mirror(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4:])
     else:
         import publish, sources
-        mirror(*publish.KAGGLE, sources.OUT, sorted(set(publish.DATASET_FILES + publish.BUCKET_FILES + ['manifest.json'])))
+        mirror(*publish.KAGGLE, publish.OUT, sorted(set(publish.DATASET_FILES + publish.BUCKET_FILES + ['manifest.json'])))

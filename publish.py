@@ -8,23 +8,37 @@ import json, os
 from huggingface_hub import HfApi, batch_bucket_files, create_bucket
 import manifest, sources
 
-REPO = 'alreadyopen/world-places'
-DATASET_FILES = ['index.json', 'countries.pmtiles'] + json.load(open(os.path.join(sources.OUT, 'index.json')))['files'] if os.path.exists(os.path.join(sources.OUT, 'index.json')) else ['index.json']   # one JSON per source
+# Two datasets from one bake: open sources (world-places) and the no-open-licence ones (world-places-nc, bake.NC).
+EDITIONS = {
+    'open': ('alreadyopen/world-places', sources.OUT, 'hf/README.md', ['countries.pmtiles'],
+             ('helenkwok/world-places', 'AlreadyOpen: World places (official figures)')),
+    'nc': ('alreadyopen/world-places-nc', os.path.join(sources.OUT, 'nc'), 'hf/README-nc.md', [],
+           ('helenkwok/world-places-nc', 'AlreadyOpen: World places, credited (no open licence)')),
+}
+ED = os.environ.get('EDITION', 'open')
+REPO, OUT, CARD, TILES, KAGGLE = EDITIONS[ED]
+_idx = os.path.join(OUT, 'index.json')
+DATASET_FILES = ['index.json'] + TILES + (json.load(open(_idx))['files'] if os.path.exists(_idx) else [])   # one JSON per source
 BUCKET_FILES = DATASET_FILES                                          # small JSON: the map reads the bucket
-KAGGLE = ('helenkwok/world-places', 'AlreadyOpen: World places (official figures)')            # mirrored by kaggle_mirror.py (title 6-50 chars)
+
 
 def main():
-    o = lambda f: os.path.join(sources.OUT, f); idx = json.load(open(o('index.json')))
-    m = manifest.manifest(sources.OUT, sorted(set(DATASET_FILES + BUCKET_FILES)), idx['counts'], idx['built'])
-    manifest.gate(m, f'https://huggingface.co/buckets/{REPO}/resolve/manifest.json')
+    o = lambda f: os.path.join(OUT, f); idx = json.load(open(o('index.json')))
+    m = manifest.manifest(OUT, sorted(set(DATASET_FILES + BUCKET_FILES)), idx['counts'], idx['built'])
+    url = f'https://huggingface.co/buckets/{REPO}/resolve/manifest.json'
+    old = manifest.published(url)
+    manifest.gate(m, url)
     json.dump(m, open(o('manifest.json'), 'w'), indent=1)
+    gone = sorted(set((old or {}).get('files', {})) - set(m['files']))       # files this edition no longer has (gate allowed it)
     api = HfApi(); api.create_repo(REPO, repo_type='dataset', exist_ok=True)
     for f in DATASET_FILES + ['manifest.json']:
         api.upload_file(path_or_fileobj=o(f), path_in_repo=f, repo_id=REPO, repo_type='dataset', commit_message=f"{f}: bake of {idx['built']}")
-    api.upload_file(path_or_fileobj=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'hf', 'README.md'), path_in_repo='README.md', repo_id=REPO, repo_type='dataset', commit_message='card')
+    for f in gone:
+        api.delete_file(f, repo_id=REPO, repo_type='dataset', commit_message=f'{f}: no longer in this dataset')
+    api.upload_file(path_or_fileobj=os.path.join(os.path.dirname(os.path.abspath(__file__)), CARD), path_in_repo='README.md', repo_id=REPO, repo_type='dataset', commit_message='card')
     create_bucket(REPO, private=False, exist_ok=True)
-    batch_bucket_files(REPO, add=[(o(f), f) for f in BUCKET_FILES] + [(o('manifest.json'), 'manifest.json')])   # the gate reads the bucket's
-    print(json.dumps({'dataset': f'https://huggingface.co/datasets/{REPO}', 'bucket': f'https://huggingface.co/buckets/{REPO}', 'built': idx['built'], 'counts': m['counts']}))
+    batch_bucket_files(REPO, add=[(o(f), f) for f in BUCKET_FILES] + [(o('manifest.json'), 'manifest.json')], delete=gone)   # the gate reads the bucket's
+    print(json.dumps({'dataset': f'https://huggingface.co/datasets/{REPO}', 'bucket': f'https://huggingface.co/buckets/{REPO}', 'built': idx['built'], 'counts': m['counts'], 'removed': gone}))
 
 if __name__ == '__main__':
     main()
