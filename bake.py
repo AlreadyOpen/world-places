@@ -314,6 +314,18 @@ def write_index(out, ids, failed, extra=None):
     json.dump(idx, open(os.path.join(out, 'index.json'), 'w'), indent=1)
 
 
+def keep_published(sid):
+    """A source failed (a flaky site): keep its last published file, so one bad fetch does not drop the place. The run still
+    lists the failure in index.json. CI starts from an empty folder, so the file comes from the dataset's bucket."""
+    out = NC_OUT if sid in NC else sources.OUT
+    repo = 'world-places-nc' if sid in NC else 'world-places'
+    try:
+        open(os.path.join(out, f'{sid}.json'), 'wb').write(get(f'https://huggingface.co/buckets/alreadyopen/{repo}/resolve/{sid}.json'))
+        print(f'{sid}: kept the published file', file=sys.stderr)
+    except Exception as e:
+        print(f'{sid}: no published file to keep ({e})', file=sys.stderr)
+
+
 def main(ids):
     os.makedirs(NC_OUT, exist_ok=True)
     failed = []
@@ -321,8 +333,9 @@ def main(ids):
         f, publisher, licence, url, *extra = SOURCES[sid]
         try:
             places = f()
-        except Exception as e:                                             # keep the last good file; the gate notices a gap
-            failed.append(f'{sid}: {e}'); print(f'{sid}: FAILED {e}', file=sys.stderr); continue
+        except Exception as e:
+            failed.append(f'{sid}: {e}'); print(f'{sid}: FAILED {e}', file=sys.stderr)
+            keep_published(sid); continue
         out = NC_OUT if sid in NC else sources.OUT
         json.dump({'source': sid, 'publisher': publisher, 'url': url, 'licence': licence, **(extra[0] if extra else {}), 'places': places},
                   open(os.path.join(out, f'{sid}.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
