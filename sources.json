@@ -26,5 +26,19 @@
   "url": "https://opendata.gov.je/dataset/jersey-population-estimate-by-age-and-sex-2010-to-present",
   "licence": "https://www.gov.je/ServiceManual/opendata/Pages/open-government-licence-jersey-ogl-j-v1-0.aspx",
   "used_by": "bake.py jersey"
+ },
+ {
+  "name": "Estimated resident population by SA2 (ABS_ANNUAL_ERP_ASGS2021)",
+  "owner": "Australian Bureau of Statistics",
+  "url": "https://www.abs.gov.au/statistics/people/population/regional-population",
+  "licence": "https://www.abs.gov.au/website-privacy-copyright-and-disclaimer",
+  "used_by": "bake.py norfolk"
+ },
+ {
+  "name": "Populations légales des collectivités d'outre-mer",
+  "owner": "INSEE",
+  "url": "https://www.insee.fr/fr/statistiques/8680667",
+  "licence": "https://www.insee.fr/fr/information/2008466",
+  "used_by": "bake.py insee"
  }
 ]

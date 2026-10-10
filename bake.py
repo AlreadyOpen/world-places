@@ -4,7 +4,7 @@ One JSON per source (never merged: each keeps its own terms), plus index.json li
   out/<id>.json  {"source", "publisher", "url", "licence", "places": [{"iso3", "name", "population", "aged_65_plus_pct",
                   "density_per_km2", "period"}]}      (a figure the source does not publish is left out, never estimated)
 Usage: python3 bake.py [<source id> ...]     (default: every source)"""
-import csv, datetime, io, json, os, sys, urllib.request
+import csv, datetime, html, io, json, os, re, sys, urllib.request
 import sources
 
 UA = {'User-Agent': 'AlreadyOpen world-places (https://github.com/AlreadyOpen/world-places)'}
@@ -67,6 +67,30 @@ def jersey():
     return [{'iso3': 'JEY', 'name': 'Jersey', 'population': total, 'aged_65_plus_pct': round(100 * old / total, 2), 'period': year}]
 
 
+def norfolk():
+    """Australian Bureau of Statistics, estimated resident population (30 June), Norfolk Island = SA2 901041004."""
+    rows = list(csv.DictReader(io.StringIO(get('https://data.api.abs.gov.au/rest/data/ABS,ABS_ANNUAL_ERP_ASGS2021,1.2.0/'
+                                               'ERP.SA2.901041004.A?format=csv').decode())))
+    r = max(rows, key=lambda r: r['TIME_PERIOD'])
+    return [{'iso3': 'NFK', 'name': 'Norfolk Island', 'population': int(float(r['OBS_VALUE'])), 'period': f"{r['TIME_PERIOD']}-06-30"}]
+
+
+def insee():
+    """INSEE, legal populations of the overseas collectivities (Saint-Pierre-et-Miquelon, Saint-Barthélemy, Saint-Martin)."""
+    # ponytail: the page id is per edition (8680667 = populations of reference 1 Jan 2023, in force 2026); bump it yearly
+    t = get('https://www.insee.fr/fr/statistiques/8680667').decode()
+    iso = {'975': ('SPM', 'Saint Pierre and Miquelon'), '977': ('BLM', 'Saint-Barthélemy'), '978': ('MAF', 'Saint-Martin')}
+    cell = lambda c: re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', '', c))).strip()
+    out = []
+    for row in re.findall(r'<tr.*?</tr>', t, re.S):
+        c = [cell(x) for x in re.findall(r'<t[hd][^>]*>(.*?)</t[hd]>', row, re.S)]
+        if len(c) == 3 and c[0] in iso:
+            out.append({'iso3': iso[c[0]][0], 'name': iso[c[0]][1], 'population': int(re.sub(r'\D', '', c[2])), 'period': '2023-01-01'})
+    if len(out) != 3:
+        raise RuntimeError(f'INSEE: expected 3 collectivities, found {len(out)}')
+    return out
+
+
 # id: (function, publisher, licence, url people can follow)
 SOURCES = {
     'taiwan': (taiwan, 'Ministry of the Interior (Taiwan), Department of Household Registration',
@@ -76,6 +100,9 @@ SOURCES = {
     'aland': (aland, 'Statistics and Research Åland (ÅSUB)', 'https://www.asub.ax/sv/om-asub/om-asubax/anvandarvillkor', 'https://www.asub.ax/sv/statistik/befolkning'),
     'jersey': (jersey, 'Statistics Jersey, Government of Jersey', 'https://www.gov.je/ServiceManual/opendata/Pages/open-government-licence-jersey-ogl-j-v1-0.aspx',
                'https://opendata.gov.je/dataset/jersey-population-estimate-by-age-and-sex-2010-to-present'),
+    'norfolk': (norfolk, 'Australian Bureau of Statistics', 'https://www.abs.gov.au/website-privacy-copyright-and-disclaimer',
+                'https://www.abs.gov.au/statistics/people/population/regional-population'),
+    'insee': (insee, 'INSEE (Source : Insee)', 'https://www.insee.fr/fr/information/2008466', 'https://www.insee.fr/fr/statistiques/8680667'),
 }
 
 
