@@ -1,3 +1,30 @@
 [
- {"name": "Example dataset (replace)", "owner": "Example Owner", "url": "https://example.org/data.csv", "licence": "https://example.org/terms", "used_by": "bake.py"}
+ {
+  "name": "Household registration statistics (ODRP014)",
+  "owner": "Ministry of the Interior (Taiwan)",
+  "url": "https://www.ris.gov.tw/app/portal/346",
+  "licence": "https://data.gov.tw/license",
+  "used_by": "bake.py taiwan"
+ },
+ {
+  "name": "Pacific Data Hub .Stat, DF_POP_PROJ",
+  "owner": "Pacific Community (SPC)",
+  "url": "https://stats.pacificdata.org",
+  "licence": "https://pacificdata.org/terms-of-use",
+  "used_by": "bake.py pacific"
+ },
+ {
+  "name": "Population by age, BE001",
+  "owner": "Statistics and Research Åland (ÅSUB)",
+  "url": "https://www.asub.ax/sv/statistik/befolkning",
+  "licence": "https://www.asub.ax/sv/om-asub/om-asubax/anvandarvillkor",
+  "used_by": "bake.py aland"
+ },
+ {
+  "name": "Annual population estimates by age and sex",
+  "owner": "Statistics Jersey",
+  "url": "https://opendata.gov.je/dataset/jersey-population-estimate-by-age-and-sex-2010-to-present",
+  "licence": "https://www.gov.je/ServiceManual/opendata/Pages/open-government-licence-jersey-ogl-j-v1-0.aspx",
+  "used_by": "bake.py jersey"
+ }
 ]
