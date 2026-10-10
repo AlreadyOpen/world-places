@@ -19,6 +19,8 @@ Taiwan, for example, has its own government and population and no World Bank ent
 - `<source>.json`, one per source, never merged, so each keeps its own terms: `publisher`, `url`, `licence`, and `places`
   with `iso3`, `name`, `population`, `period`, and where the source publishes it, `aged_65_plus_pct` and `density_per_km2`.
   A figure a source does not publish is left out, never estimated.
+- `countries.pmtiles` (bucket and dataset): Natural Earth 1:10m country outlines (public domain) as vector tiles, layer
+  `countries`, zooms 0-10, every Natural Earth field. Taiwan, Hong Kong and Macau are their own places.
 - `manifest.json`: sha256 and size of every file, the counts and the sources.
 
 | File | Places | Publisher | Terms |

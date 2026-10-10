@@ -120,5 +120,12 @@
   "licence": "https://somalilandcsd.org/",
   "licence_note": "no open licence stated; entered by hand",
   "used_by": "bake.py somaliland_manual"
+ },
+ {
+  "name": "Admin 0 countries, 1:10m, v5.1.2",
+  "owner": "Natural Earth",
+  "url": "https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/",
+  "licence": "https://www.naturalearthdata.com/about/terms-of-use/",
+  "used_by": "bake.py countries"
  }
 ]

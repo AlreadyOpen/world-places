@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: '3.14'
           cache: pip
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt && sudo apt-get update -q && sudo apt-get install -y -q tippecanoe
       # downloads kept between runs (restore and save are split so the cache is saved even when publish fails)
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9   # v6.1.0
         with:

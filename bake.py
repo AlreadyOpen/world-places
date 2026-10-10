@@ -4,7 +4,7 @@ One JSON per source (never merged: each keeps its own terms), plus index.json li
   out/<id>.json  {"source", "publisher", "url", "licence", "places": [{"iso3", "name", "population", "aged_65_plus_pct",
                   "density_per_km2", "period"}]}      (a figure the source does not publish is left out, never estimated)
 Usage: python3 bake.py [<source id> ...]     (default: every source)"""
-import csv, datetime, html, io, json, os, re, sys, time, urllib.request
+import csv, datetime, html, io, json, os, re, subprocess, sys, time, urllib.request
 import openpyxl
 import sources
 
@@ -282,6 +282,20 @@ SOURCES = {
 }
 
 
+def countries():
+    """Natural Earth 1:10m country outlines (public domain) as vector tiles, layer `countries`, every field. 1:50m was too coarse
+    at city zoom (Macau's shape sat km off the real Macau; Helen, 2026-10-10). Natural Earth draws Taiwan, Hong Kong and Macau
+    as their own places, unlike GISCO."""
+    src = os.path.join(sources.CACHE, 'ne_10m_admin_0_countries.geojson')
+    if not os.path.exists(src):
+        os.makedirs(sources.CACHE, exist_ok=True)
+        open(src, 'wb').write(get('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_0_countries.geojson'))
+    out = os.path.join(sources.OUT, 'countries.pmtiles')
+    subprocess.run(['tippecanoe', '-o', out, '--force', '-l', 'countries', '-Z0', '-z10', '--detect-shared-borders',
+                    '--no-tile-size-limit', '--no-feature-limit', '--quiet', src], check=True)
+    return len(json.load(open(src))['features'])
+
+
 def main(ids):
     os.makedirs(sources.OUT, exist_ok=True)
     failed = []
@@ -296,10 +310,15 @@ def main(ids):
         print(sid, [(p['iso3'], p['population'], p['period']) for p in places])
     files = sorted(f[:-5] for f in os.listdir(sources.OUT) if f.endswith('.json') and f[:-5] in SOURCES)
     places = {f: len(json.load(open(os.path.join(sources.OUT, f + '.json')))['places']) for f in files}
+    try:
+        places['countries'] = countries()
+    except Exception as e:
+        failed.append(f'countries: {e}'); print(f'countries: FAILED {e}', file=sys.stderr)
     idx = {'built': datetime.datetime.now().isoformat(timespec='seconds'), 'counts': places,
-           'files': [f + '.json' for f in files], 'failed': failed}
+           'files': [f + '.json' for f in files], 'failed': failed,
+           'tiles': 'countries.pmtiles' if os.path.exists(os.path.join(sources.OUT, 'countries.pmtiles')) else None}
     json.dump(idx, open(os.path.join(sources.OUT, 'index.json'), 'w'), indent=1)
-    if failed and len(failed) == len(ids):
+    if len([f for f in failed if not f.startswith('countries:')]) == len(ids):
         sys.exit('every source failed')
 
 

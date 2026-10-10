@@ -9,8 +9,8 @@ from huggingface_hub import HfApi, batch_bucket_files, create_bucket
 import manifest, sources
 
 REPO = 'alreadyopen/world-places'
-DATASET_FILES = ['index.json'] + json.load(open(os.path.join(sources.OUT, 'index.json')))['files'] if os.path.exists(os.path.join(sources.OUT, 'index.json')) else ['index.json']   # one JSON per source
-BUCKET_FILES = DATASET_FILES                                           # small JSON: the map reads the bucket
+DATASET_FILES = ['index.json', 'countries.pmtiles'] + json.load(open(os.path.join(sources.OUT, 'index.json')))['files'] if os.path.exists(os.path.join(sources.OUT, 'index.json')) else ['index.json']   # one JSON per source
+BUCKET_FILES = DATASET_FILES                                          # small JSON: the map reads the bucket
 KAGGLE = ('helenkwok/world-places', 'AlreadyOpen: World places (official figures)')            # mirrored by kaggle_mirror.py (title 6-50 chars)
 
 def main():
