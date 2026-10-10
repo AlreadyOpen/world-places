@@ -40,5 +40,85 @@
   "url": "https://www.insee.fr/fr/statistiques/8680667",
   "licence": "https://www.insee.fr/fr/information/2008466",
   "used_by": "bake.py insee"
+ },
+ {
+  "name": "Supplementary data: population by single year of age",
+  "owner": "States of Guernsey Data & Analysis",
+  "url": "https://www.gov.gg/population",
+  "licence": "https://www.gov.gg/population",
+  "licence_note": "no open licence stated",
+  "used_by": "bake.py guernsey"
+ },
+ {
+  "name": "Nüfus ve Demografi İstatistikleri (NufusDemo workbook, N3)",
+  "owner": "TRNC Statistical Institute",
+  "url": "https://stat.gov.ct.tr/TEMEL-%C4%B0STAT%C4%B0ST%C4%B0KLER/N%C3%9CFUS-VE-DEMOGRAF%C4%B0-%C4%B0STAT%C4%B0ST%C4%B0KLER%C4%B0",
+  "licence": "https://stat.gov.ct.tr/Terms",
+  "licence_note": "no open licence stated",
+  "used_by": "bake.py northern_cyprus"
+ },
+ {
+  "name": "1.1 Population, Table 1.01.1.0",
+  "owner": "Anguilla Statistics Department",
+  "url": "https://statistics.gov.ai/AllDocuments/1.1%20Population.xlsx",
+  "licence": "https://statistics.gov.ai/",
+  "licence_note": "no open licence stated",
+  "used_by": "bake.py anguilla"
+ },
+ {
+  "name": "Mid-year population estimates 2019-2024",
+  "owner": "Statistics Department Montserrat",
+  "url": "https://statistics.gov.ms/subjects/social-and-demographic-statistics/population-and-demography/mid-year-population-estimates-2019-2024/",
+  "licence": "https://statistics.gov.ms/",
+  "licence_note": "no open licence stated",
+  "used_by": "bake.py montserrat"
+ },
+ {
+  "name": "Population (monthly workbook)",
+  "owner": "St Helena Government Statistics Office",
+  "url": "https://sainthelena.gov.sh/documents/population/",
+  "licence": "https://www.sainthelena.gov.sh/st-helena/statistics/",
+  "licence_note": "no open licence stated",
+  "used_by": "bake.py saint_helena"
+ },
+ {
+  "name": "Tristan da Cunha population update",
+  "owner": "Tristan da Cunha Association",
+  "url": "https://tristandc.com/population.php",
+  "licence": "https://tristandc.com/population.php",
+  "licence_note": "no open licence stated",
+  "used_by": "bake.py saint_helena"
+ },
+ {
+  "name": "2021 Census Tables",
+  "owner": "Falkland Islands Government",
+  "url": "https://www.gov.fk/policy/wp-content/uploads/sites/33/2026/05/2021-Census-Tables.xlsx",
+  "licence": "https://www.gov.fk/policy/",
+  "licence_note": "no open licence stated",
+  "used_by": "bake.py falklands"
+ },
+ {
+  "name": "Popolazione",
+  "owner": "Governatorato dello Stato della Città del Vaticano",
+  "url": "https://www.vaticanstate.va/it/stato-e-governo/note-generali/popolazione.html",
+  "licence": "https://www.vaticanstate.va/",
+  "licence_note": "no open licence stated",
+  "used_by": "bake.py vatican"
+ },
+ {
+  "name": "Population légale RGPH 2024 by region",
+  "owner": "Haut-Commissariat au Plan",
+  "url": "https://www.hcp.ma/Population-legale-du-Royaume-du-Maroc-repartie-par-regions-provinces-et-prefectures-et-communes-selon-les-resultats-du_a3974.html",
+  "licence": "https://www.hcp.ma/Conditions-generales-d-utilisation-Version-1-0_a2194.html",
+  "licence_note": "CC BY 4.0 for indicators",
+  "used_by": "bake.py morocco_hcp"
+ },
+ {
+  "name": "Somaliland in Figures, 20th edition (2022)",
+  "owner": "Central Statistics Department, Ministry of Planning and National Development, Somaliland",
+  "url": "https://somalilandcsd.org/wp-content/uploads/2022/12/A5-CSD_SOMALILAND-IN-FIGURES.pdf",
+  "licence": "https://somalilandcsd.org/",
+  "licence_note": "no open licence stated; entered by hand",
+  "used_by": "bake.py somaliland_manual"
  }
 ]
