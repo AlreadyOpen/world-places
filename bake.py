@@ -157,7 +157,7 @@ def anguilla():
     est = next(r for r in rows if 'Population Estimates' in r)
     j = max(i for i, y in enumerate(years) if re.fullmatch(r'\d{4}', str(y or '').strip()) and isinstance(est[i], (int, float)))
     return [{'iso3': 'AIA', 'name': 'Anguilla', 'population': round(est[j]), 'period': str(years[j]),
-             'notes': 'Population estimate, a crude estimate rather than a count (last census 2011)'}]
+             'notes': 'Population estimate (Table 1.01.1.0, Population Estimates); age data in this file is from the 2011 census only'}]
 
 
 def montserrat():
