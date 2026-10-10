@@ -13,7 +13,7 @@ EDITIONS = {
     'open': ('alreadyopen/world-places', sources.OUT, 'hf/README.md', ['countries.pmtiles'],
              ('helenkwok/world-places', 'AlreadyOpen: World places (official figures)')),
     'nc': ('alreadyopen/world-places-nc', os.path.join(sources.OUT, 'nc'), 'hf/README-nc.md', [],
-           ('helenkwok/world-places-nc', 'AlreadyOpen: World places, credited (no open licence)')),
+           ('helenkwok/world-places-nc', 'AlreadyOpen: World places nc (credited)')),
 }
 ED = os.environ.get('EDITION', 'open')
 REPO, OUT, CARD, TILES, KAGGLE = EDITIONS[ED]
