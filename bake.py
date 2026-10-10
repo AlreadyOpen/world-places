@@ -189,15 +189,17 @@ def saint_helena():
     old = next(r for r in rows if r[0] == 'POP.RESIDENT.65+')
     j = max(i for i, v in enumerate(res) if i > 5 and isinstance(v, (int, float)) and isinstance(old[i], (int, float)))
     y, m = str(head[j]).split(',')
-    t = text(get('https://tristandc.com/population.php').decode())
-    n = re.search(r'There are (\d+) Tristan da Cunha Islanders', t)
-    when = re.search(r'Population Update (\d+)(?:st|nd|rd|th)? (\w+) (\d{4})', t)
-    if not (n and when):
-        raise RuntimeError('Tristan da Cunha: islander count or update date not found')
-    period = datetime.datetime.strptime(' '.join(when.groups()), '%d %B %Y').date().isoformat()
+    # The page's islanders chart: rows [new Date(y, month0, d), on Tristan, overseas]; the latest row is the current count.
+    raw = get('https://tristandc.com/population.php').decode('utf-8', 'ignore')
+    chart = raw[raw.index('function islandersChart'):raw.index('function populationChart')]
+    rows = re.findall(r'\[new Date\((\d{4}), (\d+), (\d+)\), (\d+), (\d+)\]', chart)
+    if not rows:
+        raise RuntimeError('Tristan da Cunha: islanders chart not found')
+    yy, mm, dd, on, away = map(int, max(rows, key=lambda r: tuple(map(int, r[:3]))))
+    n = on + away; period = f'{yy}-{mm + 1:02d}-{dd:02d}'
     return [{'iso3': 'SHN', 'name': 'Saint Helena', 'population': int(res[j]), 'aged_65_plus_pct': pct(old[j], res[j]),
              'period': f'{y.strip()}-{int(m):02d}', 'notes': 'Resident on-island population (six-month rule), St Helena island only'},
-            {'iso3': 'SHN-TA', 'name': 'Tristan da Cunha', 'population': int(n.group(1)), 'period': period,
+            {'iso3': 'SHN-TA', 'name': 'Tristan da Cunha', 'population': n, 'on_island': on, 'period': period,
              'notes': 'Tristan da Cunha Islanders (residency status, including those temporarily overseas); a sub-place of '
                       'Saint Helena, Ascension and Tristan da Cunha with no polygon of its own in Natural Earth',
              'publisher': 'Tristan da Cunha Government and Tristan da Cunha Association', 'url': 'https://tristandc.com/population.php'}]
